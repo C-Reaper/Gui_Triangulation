@@ -117,30 +117,7 @@ void Update(AlxWindow* w){
 	
 	const Rect box_s = TransformedView_WorldScreenRect(&tv,box);
 	Rect_RenderWire(WINDOW_STD_ARGS,box_s,WHITE,1.0f);
-
-	for(int i = 0;i<mesh.size;i++){
-		const Triangle t = *(Triangle*)Vector_Get(&mesh,i);
-		const Vec2 avg = Vec2_Mulf((Vec2){ t.p1.x + t.p2.x + t.p3.x,t.p1.y + t.p2.y + t.p3.y },0.333333f);
-		const float avg_len = Vec2_Mag(avg);
-		
-		const Vec2 p1 = TransformedView_WorldScreenPos(&tv,t.p1);
-		const Vec2 p2 = TransformedView_WorldScreenPos(&tv,t.p2);
-		const Vec2 p3 = TransformedView_WorldScreenPos(&tv,t.p3);
-		
-		const Vec2 d1 = Vec2_Sub(t.p1,t.p2);
-		const Vec2 d2 = Vec2_Sub(t.p1,t.p3);
-		const float area = d1.x * d2.y - d1.y * d2.x;
-
-		const float mid = Vec2_Mag(box.d);
-		const float area_light = F32_Sigmoid((area - mid) / mid);
-		const float pos_light = F32_Sigmoid((area - avg_len) / mid);
-
-		const float light = (area_light + pos_light) * (0.5f * 0.8f) + 0.2f;
-		const Pixel color = Pixel_Mulf(RED,light);
-		
-		Triangle_RenderX(WINDOW_STD_ARGS,p1,p2,p3,color);
-		//Triangle_RenderXWire(WINDOW_STD_ARGS,p1,p2,p3,WHITE,1.0f);
-	}
+	Delaunay_Render(WINDOW_STD_ARGS,box,&tv,&mesh);
 	
 	const Vec2 size = TransformedView_WorldScreenLength(&tv,Vec2_Mulf(Vec2_Norm((Vec2){ 1.0f,1.0f }),POINT_RADIUS));
 	for(int i = 0;i<points.size;i++){
@@ -154,6 +131,7 @@ void Update(AlxWindow* w){
 }
 void Delete(AlxWindow* w){
 	Vector_Free(&points);
+	Vector_Free(&velocitys);
 	Vector_Free(&mesh);
 }
 
